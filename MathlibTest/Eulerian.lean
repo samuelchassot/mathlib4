@@ -11,76 +11,6 @@ namespace Walk
 variable {V : Type*} [Fintype V] [DecidableEq V]
 variable {G : SimpleGraph V} [DecidableRel G.Adj]
 
-#check SimpleGraph.Walk.IsEulerian
-#check SimpleGraph.Walk.IsTrail
-#check SimpleGraph.Walk.IsEulerian.isTrail
-#check SimpleGraph.Walk.IsEulerian.even_degree_iff
-#check SimpleGraph.Walk.IsEulerian.card_odd_degree
-
-#check SimpleGraph.Connected
-#check SimpleGraph.Preconnected
-
-#check SimpleGraph.Walk.nil
-#check SimpleGraph.Walk.cons
-#check SimpleGraph.Walk.append
-#check SimpleGraph.Walk.reverse
-#check SimpleGraph.Walk.edges
-#check SimpleGraph.Walk.support
-
-#check SimpleGraph.Walk.IsTrail
-#check SimpleGraph.Walk.IsTrail.cons
-#check SimpleGraph.Walk.IsTrail.reverse
-
-#check SimpleGraph.Walk.edges_reverse
-#check List.length_reverse
-#check List.mem_reverse
-
-#check SimpleGraph.card_incidenceFinset_eq_degree
-#check SimpleGraph.incidenceFinset_eq_filter
-#check SimpleGraph.Walk.IsTrail.edgesFinset
-#check SimpleGraph.Walk.edges_subset_edgeSet
-#check SimpleGraph.Walk.IsTrail.isEulerian_of_forall_mem
-#check SimpleGraph.Walk.IsTrail.even_countP_edges_iff
-#check SimpleGraph.Walk.IsTrail.edges_nodup
-#check Multiset.countP_eq_card_filter
-#check Multiset.coe_countP
-
-#check SimpleGraph.incidenceFinset
-#check SimpleGraph.mem_incidenceFinset
-#check SimpleGraph.incidenceSet
-#check SimpleGraph.mem_incidenceSet
-#check SimpleGraph.edgeSet
-#check SimpleGraph.mem_edgeSet
-#check Sym2.mem_iff
-#check Sym2.eq_swap
-
-#check List.toFinset_card_of_nodup
-#check Finset.card_le_card
-#check List.mem_toFinset
-#check SimpleGraph.edgeFinset
-
-
-#check SimpleGraph.Connected
-#check SimpleGraph.Preconnected
-#check SimpleGraph.Reachable
-#check SimpleGraph.Walk.IsPath
-#check SimpleGraph.Walk.toPath
-#check SimpleGraph.Walk.support
-#check SimpleGraph.Walk.edges_subset_edgeSet
-#check SimpleGraph.Walk.isTrail_def
-#check SimpleGraph.Walk.getVert
-#check SimpleGraph.Walk.start_mem_support
-#check SimpleGraph.Walk.end_mem_support
-#check SimpleGraph.Walk.mem_support_iff
-#check SimpleGraph.Walk.mem_support_iff_exists_append
-#check SimpleGraph.Walk.mem_support_iff_exists_mem_edges
-#check SimpleGraph.Walk.mem_support_of_mem_edges
-#check SimpleGraph.Walk.fst_mem_support_of_mem_edges
-#check SimpleGraph.Walk.snd_mem_support_of_mem_edges
-#check SimpleGraph.Walk.rotate
-#check SimpleGraph.Walk.isTrail_rotate
-#check SimpleGraph.Walk.mem_support_rotate_iff
-
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
 theorem IsTrail.cons_of_unused_edge
     {u v w : V} {p : G.Walk v w}
@@ -302,6 +232,7 @@ noncomputable def trailLengthSetAll : Finset ℕ := by
   exact (Finset.range (G.edgeFinset.card + 1)).filter fun n =>
     ∃ x, ∃ y, ∃ p : G.Walk x y, p.IsTrail ∧ p.edges.length = n
 
+omit [DecidableEq V] in
 theorem zero_mem_trailLengthSetAll (u : V) :
     0 ∈ (trailLengthSetAll (G := G) : Finset ℕ) := by
   classical
