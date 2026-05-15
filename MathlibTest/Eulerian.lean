@@ -423,10 +423,25 @@ theorem exists_closed_maximalTrailFrom_of_forall_even_degree
   exact ⟨p, hpmax⟩
 
 
+omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
+theorem exists_unused_incident_edge_of_walk_to_not_support
+    {u v x y : V} {p : G.Walk u v}
+    (w : G.Walk x y)
+    (hx : x ∈ p.support)
+    (hy : y ∉ p.support) :
+    ∃ a b : V, a ∈ p.support ∧ G.Adj a b ∧ s(a, b) ∉ p.edges := by
+  induction w with
+  | nil =>
+      exact (hy hx).elim
+  | cons hab tail ih =>
+      by_cases hb : tail.getVert 0 ∈ p.support
+      · exact ih (by simpa using hb) hy
+      · refine ⟨_, _, hx, hab, ?_⟩
+        intro hedge
+        exact hb (p.mem_support_of_mem_edges hedge (by simp [Sym2.mem_iff]))
 
 
--- final theorem
-
+omit [Fintype V] [DecidableRel G.Adj] in
 theorem MaximalTrail.isEulerian_of_connected
     {u : V} {p : G.Walk u u}
     (hpmax : MaximalTrail p)
@@ -435,27 +450,74 @@ theorem MaximalTrail.isEulerian_of_connected
   refine hpmax.1.isEulerian_of_forall_mem ?_
   intro e he
   by_contra hnot
-  -- Need contradiction from an unused graph edge.
-  sorry
+
+  suffices ∃ x y : V, x ∈ p.support ∧ G.Adj x y ∧ s(x, y) ∉ p.edges by
+    rcases this with ⟨x, y, hxp, hxy, hxy_not⟩
+
+    let q : G.Walk x x := p.rotate x hxp
+
+    have hqTrail : q.IsTrail := by
+      dsimp [q]
+      simpa using (SimpleGraph.Walk.isTrail_rotate (c := p) hxp).mpr hpmax.1
+
+    have hxy_not_q : s(x, y) ∉ q.edges := by
+      intro hmem
+      apply hxy_not
+      dsimp [q] at hmem
+      exact ((p.rotate_edges x hxp).mem_iff).mp hmem
+
+    obtain ⟨r, hrTrail, hrLen⟩ :
+        ∃ r : G.Walk y x, r.IsTrail ∧ q.edges.length < r.edges.length :=
+      IsTrail.exists_longer_of_unused_edge_at_start
+        (p := q) hqTrail hxy.symm (by
+          simpa [Sym2.eq_swap] using hxy_not_q)
+
+    have hmax := hpmax.2 r hrTrail
+
+    have hqLen : q.edges.length = p.edges.length := by
+      dsimp [q]
+      exact (p.rotate_edges x hxp).perm.length_eq
+
+    have : p.edges.length < r.edges.length := by
+      omega
+
+    exact Nat.not_lt_of_ge hmax this
+
+  induction e using Sym2.ind with
+  | h a b =>
+      have hab : G.Adj a b := (G.mem_edgeSet).mp he
+
+      by_cases ha : a ∈ p.support
+      · exact ⟨a, b, ha, hab, by simpa using hnot⟩
+
+      by_cases hb : b ∈ p.support
+      · refine ⟨b, a, hb, hab.symm, ?_⟩
+        intro hba
+        apply hnot
+        simpa [Sym2.eq_swap] using hba
+
+      have hreach : G.Reachable u a := by
+        exact hconn.1 u a
+
+      rcases hreach with ⟨w⟩
+
+      exact exists_unused_incident_edge_of_walk_to_not_support
+        (p := p) w p.start_mem_support ha
 
 
+theorem exists_isEulerian_of_connected_forall_even_degree
+    (u₀ : V)
+    (hconn : G.Connected)
+    (heven : ∀ x : V,
+      Even (@SimpleGraph.degree V G x
+        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+    ∃ u, ∃ p : G.Walk u u, p.IsEulerian := by
+  obtain ⟨u, p, hpmax⟩ :=
+    exists_closed_maximalTrail_of_forall_even_degree (G := G) u₀ heven
+  exact ⟨u, p, hpmax.isEulerian_of_connected hconn⟩
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#print SimpleGraph.Connected
+#print SimpleGraph.Preconnected
 
 
 example {u v : V} (p : G.Walk u v) (h : p.IsEulerian) :
