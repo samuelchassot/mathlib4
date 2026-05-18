@@ -7,8 +7,7 @@ theorem SimpleGraph.Walk.exists_isEulerian_of_connected_forall_even_degree
     (u₀ : V)
     (hconn : G.Connected)
     (heven : ∀ x : V,
-      Even (@SimpleGraph.degree V G x
-        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+      Even (G.degree x)) :
     ∃ u, ∃ p : G.Walk u u, p.IsEulerian
 ```
 
@@ -49,8 +48,7 @@ theorem exists_isEulerian_of_connected_forall_even_degree
     (u₀ : V)
     (hconn : G.Connected)
     (heven : ∀ x : V,
-      Even (@SimpleGraph.degree V G x
-        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+      Even (G.degree x)) :
     ∃ u, ∃ p : G.Walk u u, p.IsEulerian
 ```
 
@@ -424,8 +422,7 @@ theorem MaximalTrailFrom.isClosed_of_forall_even_degree
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrailFrom p)
     (heven : ∀ x : V,
-      Even (@SimpleGraph.degree V G x
-        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+      Even (G.degree x)) :
     u = v
 ```
 
@@ -456,8 +453,7 @@ theorem MaximalTrail.isClosed_of_forall_even_degree
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrail p)
     (heven : ∀ x : V,
-      Even (@SimpleGraph.degree V G x
-        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+      Even (G.degree x)) :
     u = v
 ```
 
@@ -607,8 +603,7 @@ Natural-language proof:
 theorem exists_closed_maximalTrailFrom_of_forall_even_degree
     (u : V)
     (heven : ∀ x : V,
-      Even (@SimpleGraph.degree V G x
-        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+      Even (G.degree x)) :
     ∃ p : G.Walk u u, MaximalTrailFrom p
 ```
 
@@ -734,8 +729,7 @@ This lemma is used by:
 theorem exists_closed_maximalTrail_of_forall_even_degree
     (u₀ : V)
     (heven : ∀ x : V,
-      Even (@SimpleGraph.degree V G x
-        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
+      Even (G.degree x)) :
     ∃ u, ∃ p : G.Walk u u, MaximalTrail p
 ```
 

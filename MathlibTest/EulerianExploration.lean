@@ -12,7 +12,7 @@ variable {V : Type*} [Fintype V] [DecidableEq V]
 variable {G : SimpleGraph V} [DecidableRel G.Adj]
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem IsTrail.cons_of_unused_edge
+theorem IsTrail.cons_of_unused_edge
     {u v w : V} {p : G.Walk v w}
     (hp : p.IsTrail)
     (huv : G.Adj u v)
@@ -21,7 +21,7 @@ private theorem IsTrail.cons_of_unused_edge
   exact hp.cons huv hunused
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem IsTrail.exists_longer_of_unused_edge_at_start
+theorem IsTrail.exists_longer_of_unused_edge_at_start
     {u v w : V} {p : G.Walk v w}
     (hp : p.IsTrail)
     (huv : G.Adj u v)
@@ -31,8 +31,10 @@ private theorem IsTrail.exists_longer_of_unused_edge_at_start
   · exact hp.cons huv hunused
   · simp
 
+
+-- Maximal trails
 omit [DecidableEq V] [DecidableRel G.Adj] in
-private def MaximalTrailFrom {u v : V} (p : G.Walk u v) : Prop :=
+def MaximalTrailFrom {u v : V} (p : G.Walk u v) : Prop :=
   p.IsTrail ∧
     ∀ ⦃w : V⦄ (q : G.Walk u w),
       q.IsTrail →
@@ -46,7 +48,7 @@ def MaximalTrail {u v : V} (p : G.Walk u v) : Prop :=
       q.edges.length ≤ p.edges.length
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem MaximalTrail.to_MaximalTrailFrom
+theorem MaximalTrail.toMaximalTrailFrom
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrail p) :
     MaximalTrailFrom p := by
@@ -56,8 +58,9 @@ private theorem MaximalTrail.to_MaximalTrailFrom
     exact hpmax.2 q hq
 
 
+-- endpoint/maximality lemmas
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem MaximalTrailFrom.not_unused_edge_at_end
+theorem MaximalTrailFrom.not_unused_edge_at_end
     {u v w : V} {p : G.Walk u v}
     (hpmax : MaximalTrailFrom p)
     (hvw : G.Adj v w) :
@@ -99,7 +102,7 @@ private theorem MaximalTrailFrom.not_unused_edge_at_end
 
 
 omit [Fintype V] [DecidableRel G.Adj] in
-private theorem IsTrail.not_even_countP_edges_right_of_ne
+theorem IsTrail.not_even_countP_edges_right_of_ne
     {u v : V} {p : G.Walk u v}
     (hp : p.IsTrail)
     (huv : u ≠ v) :
@@ -109,7 +112,7 @@ private theorem IsTrail.not_even_countP_edges_right_of_ne
   exact (h huv).2 rfl
 
 omit [Fintype V] [DecidableRel G.Adj] in
-private theorem IsTrail.odd_countP_edges_right_of_ne
+theorem IsTrail.odd_countP_edges_right_of_ne
     {u v : V} {p : G.Walk u v}
     (hp : p.IsTrail)
     (huv : u ≠ v) :
@@ -119,7 +122,7 @@ private theorem IsTrail.odd_countP_edges_right_of_ne
 
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem exists_adj_of_mem_edgeSet_and_mem
+theorem exists_adj_of_mem_edgeSet_and_mem
     {v : V} {e : Sym2 V}
     (heG : e ∈ G.edgeSet)
     (hev : v ∈ e) :
@@ -134,7 +137,7 @@ private theorem exists_adj_of_mem_edgeSet_and_mem
         exact Sym2.eq_swap
 
 
-private theorem MaximalTrailFrom.filter_edgesFinset_eq_incidenceFinset
+theorem MaximalTrailFrom.filter_edgesFinset_eq_incidenceFinset
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrailFrom p) :
     hpmax.1.edgesFinset.filter (fun e => v ∈ e) = G.incidenceFinset v := by
@@ -160,7 +163,7 @@ private theorem MaximalTrailFrom.filter_edgesFinset_eq_incidenceFinset
     · simpa [IsTrail.edgesFinset] using hpmax.not_unused_edge_at_end hvw
     · simp
 
-private theorem MaximalTrailFrom.countP_edges_right_eq_degree
+theorem MaximalTrailFrom.countP_edges_right_eq_degree
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrailFrom p) :
     p.edges.countP (fun e => v ∈ e) =
@@ -172,11 +175,12 @@ private theorem MaximalTrailFrom.countP_edges_right_eq_degree
     (G.incidenceFinset v).card
   rw [hpmax.filter_edgesFinset_eq_incidenceFinset]
 
-private theorem MaximalTrailFrom.is_closed_of_forall_even_degree
+theorem MaximalTrailFrom.isClosed_of_forall_even_degree
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrailFrom p)
     (heven : ∀ x : V,
-      Even (G.degree x)) :
+      Even (@SimpleGraph.degree V G x
+        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
     u = v := by
   by_contra huv
 
@@ -201,15 +205,15 @@ noncomputable def trailLengthSet (u : V) : Finset ℕ := by classical
   exact (Finset.range (G.edgeFinset.card + 1)).filter fun n =>
     ∃ v, ∃ p : G.Walk u v, p.IsTrail ∧ p.edges.length = n
 
-omit [DecidableEq V] in
-private theorem zero_mem_trailLengthSet (u : V) :
-  0 ∈ trailLengthSet (G := G) u := by
+theorem zero_mem_trailLengthSet (u : V) :
+    0 ∈ trailLengthSet (G := G) u := by
   unfold trailLengthSet
   simp
   exact ⟨u, SimpleGraph.Walk.nil, by simp, by simp⟩
 
 
-private theorem IsTrail.length_edges_le_card_edgeFinset
+-- length bound
+theorem IsTrail.length_edges_le_card_edgeFinset
     {u v : V} {p : G.Walk u v}
     (hp : p.IsTrail) :
     p.edges.length ≤ G.edgeFinset.card := by
@@ -222,13 +226,14 @@ private theorem IsTrail.length_edges_le_card_edgeFinset
   rw [← List.toFinset_card_of_nodup hnodup]
   exact Finset.card_le_card hsub
 
+-- global maximality
 noncomputable def trailLengthSetAll : Finset ℕ := by
   classical
   exact (Finset.range (G.edgeFinset.card + 1)).filter fun n =>
     ∃ x, ∃ y, ∃ p : G.Walk x y, p.IsTrail ∧ p.edges.length = n
 
 omit [DecidableEq V] in
-private theorem zero_mem_trailLengthSetAll (u : V) :
+theorem zero_mem_trailLengthSetAll (u : V) :
     0 ∈ (trailLengthSetAll (G := G) : Finset ℕ) := by
   classical
   unfold trailLengthSetAll
@@ -239,7 +244,7 @@ noncomputable def maxTrailLengthAll (u : V) : ℕ :=
   (trailLengthSetAll (G := G)).max'
     ⟨0, zero_mem_trailLengthSetAll (G := G) u⟩
 
-private theorem trail_length_le_maxTrailLengthAll
+theorem trail_length_le_maxTrailLengthAll
     (u₀ : V)
     {x y : V} {p : G.Walk x y}
     (hp : p.IsTrail) :
@@ -254,7 +259,7 @@ private theorem trail_length_le_maxTrailLengthAll
     exact Nat.lt_succ_of_le hp.length_edges_le_card_edgeFinset
   · exact ⟨x, y, p, hp, rfl⟩
 
-private theorem exists_maximalTrail
+theorem exists_maximalTrail
     (u₀ : V) :
     ∃ x, ∃ y, ∃ p : G.Walk x y, MaximalTrail p := by
   classical
@@ -276,22 +281,24 @@ private theorem exists_maximalTrail
     rw [hpLen]
     exact hqLe
 
-private theorem MaximalTrail.is_closed_of_forall_even_degree
+theorem MaximalTrail.isClosed_of_forall_even_degree
     {u v : V} {p : G.Walk u v}
     (hpmax : MaximalTrail p)
     (heven : ∀ x : V,
-      Even (G.degree x)) :
+      Even (@SimpleGraph.degree V G x
+        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
     u = v := by
-  exact hpmax.to_MaximalTrailFrom.is_closed_of_forall_even_degree heven
+  exact hpmax.toMaximalTrailFrom.isClosed_of_forall_even_degree heven
 
 
-private theorem exists_closed_maximalTrail_of_forall_even_degree
+theorem exists_closed_maximalTrail_of_forall_even_degree
     (u₀ : V)
     (heven : ∀ x : V,
-      Even (G.degree x)) :
+      Even (@SimpleGraph.degree V G x
+        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
     ∃ u, ∃ p : G.Walk u u, MaximalTrail p := by
   obtain ⟨x, y, p, hpmax⟩ := exists_maximalTrail (G := G) u₀
-  have hxy : x = y := hpmax.is_closed_of_forall_even_degree heven
+  have hxy : x = y := hpmax.isClosed_of_forall_even_degree heven
   subst y
   exact ⟨x, p, hpmax⟩
 
@@ -300,7 +307,7 @@ noncomputable def maxTrailLengthFrom (u : V) : ℕ :=
   (trailLengthSet (G := G) u).max'
     ⟨0, zero_mem_trailLengthSet (G := G) u⟩
 
-private theorem trail_length_le_maxTrailLengthFrom
+theorem trail_length_le_maxTrailLengthFrom
     {u v : V} {p : G.Walk u v}
     (hp : p.IsTrail) :
     p.edges.length ≤ maxTrailLengthFrom (G := G) u := by classical
@@ -313,7 +320,7 @@ private theorem trail_length_le_maxTrailLengthFrom
     exact Nat.lt_succ_of_le hp.length_edges_le_card_edgeFinset
   · exact ⟨v, p, hp, rfl⟩
 
-private theorem exists_maximalTrailFrom
+theorem exists_maximalTrailFrom
     (u : V) :
     ∃ v, ∃ p : G.Walk u v, MaximalTrailFrom p := by
   classical
@@ -335,19 +342,20 @@ private theorem exists_maximalTrailFrom
     rw [hpLen]
     exact hqLe
 
-private theorem exists_closed_maximalTrailFrom_of_forall_even_degree
+theorem exists_closed_maximalTrailFrom_of_forall_even_degree
     (u : V)
     (heven : ∀ x : V,
-      Even (G.degree x)) :
+      Even (@SimpleGraph.degree V G x
+        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
     ∃ p : G.Walk u u, MaximalTrailFrom p := by
   obtain ⟨v, p, hpmax⟩ := exists_maximalTrailFrom (G := G) u
-  have huv : u = v := hpmax.is_closed_of_forall_even_degree heven
+  have huv : u = v := hpmax.isClosed_of_forall_even_degree heven
   subst v
   exact ⟨p, hpmax⟩
 
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem exists_unused_incident_edge_of_walk_to_not_support
+theorem exists_unused_incident_edge_of_walk_to_not_support
     {u v x y : V} {p : G.Walk u v}
     (w : G.Walk x y)
     (hx : x ∈ p.support)
@@ -365,7 +373,7 @@ private theorem exists_unused_incident_edge_of_walk_to_not_support
 
 
 omit [Fintype V] [DecidableRel G.Adj] in
-private theorem MaximalTrail.is_eulerian_of_connected
+theorem MaximalTrail.isEulerian_of_connected
     {u : V} {p : G.Walk u u}
     (hpmax : MaximalTrail p)
     (hconn : G.Connected) :
@@ -430,15 +438,27 @@ private theorem MaximalTrail.is_eulerian_of_connected
 
 
 -- MAIN THEOREM
-theorem exists_is_eulerian_of_connected_forall_even_degree
+theorem exists_isEulerian_of_connected_forall_even_degree
     (u₀ : V)
     (hconn : G.Connected)
     (heven : ∀ x : V,
-      Even (G.degree x)) :
+      Even (@SimpleGraph.degree V G x
+        (Subtype.fintype (Membership.mem (G.neighborSet x))))) :
     ∃ u, ∃ p : G.Walk u u, p.IsEulerian := by
   obtain ⟨u, p, hpmax⟩ :=
     exists_closed_maximalTrail_of_forall_even_degree (G := G) u₀ heven
-  exact ⟨u, p, hpmax.is_eulerian_of_connected hconn⟩
+  exact ⟨u, p, hpmax.isEulerian_of_connected hconn⟩
+
+example {u v : V} (p : G.Walk u v) (h : p.IsEulerian) :
+    p.IsTrail := by
+  exact h.isTrail
+
+example {u : V} {p : G.Walk u u} (h : p.IsEulerian) (x : V) :
+    Even (@SimpleGraph.degree V G x
+      (Subtype.fintype (Membership.mem (G.neighborSet x)))) := by
+  exact (h.even_degree_iff (x := x)).mpr (by
+    intro huu
+    exact False.elim (huu rfl))
 
 end Walk
 end SimpleGraph
