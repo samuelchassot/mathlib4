@@ -436,6 +436,8 @@ theorem MaximalTrail.isEulerian_of_connected
         (p := p) w p.start_mem_support ha
 
 
+
+-- MAIN THEOREM
 theorem exists_isEulerian_of_connected_forall_even_degree
     (u₀ : V)
     (hconn : G.Connected)
@@ -446,10 +448,6 @@ theorem exists_isEulerian_of_connected_forall_even_degree
   obtain ⟨u, p, hpmax⟩ :=
     exists_closed_maximalTrail_of_forall_even_degree (G := G) u₀ heven
   exact ⟨u, p, hpmax.isEulerian_of_connected hconn⟩
-
-#print SimpleGraph.Connected
-#print SimpleGraph.Preconnected
-
 
 example {u v : V} (p : G.Walk u v) (h : p.IsEulerian) :
     p.IsTrail := by
