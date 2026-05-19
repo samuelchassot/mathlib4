@@ -1230,7 +1230,7 @@ private theorem MaximalTrail.not_closed_of_connected_card_odd_degree_eq_two
   omega
 
 
-theorem exists_isEulerian_of_connected_card_odd_degree_eq_two
+theorem exists_isEulerian_of_connected_card_oddDegree_eq_two
     (hconn : G.Connected)
     (hodd : Fintype.card {v : V | Odd (G.degree v)} = 2) :
     ∃ u v, ∃ p : G.Walk u v, p.IsEulerian := by
@@ -1266,6 +1266,51 @@ private theorem MaximalTrail.not_closed_walk_of_connected_card_odd_degree_eq_two
       u ≠ u :=
     hpmax.not_closed_of_connected_card_odd_degree_eq_two hconn hodd
   exact hne rfl
+
+
+
+
+
+  private theorem forall_even_degree_of_card_oddDegree_eq_zero
+    (hodd : Fintype.card {v : V | Odd (G.degree v)} = 0) :
+    ∀ v : V, Even (G.degree v) := by
+  classical
+  intro v
+  by_contra hvEven
+
+  have hvOdd : Odd (G.degree v) :=
+    Nat.not_even_iff_odd.mp hvEven
+
+  have hEmpty : IsEmpty {v : V | Odd (G.degree v)} := by
+    rw [← Fintype.card_eq_zero_iff]
+    exact hodd
+
+  exact False.elim (hEmpty.false ⟨v, hvOdd⟩)
+
+
+/-- A connected finite graph has an Eulerian trail if it has either no odd-degree vertices
+or exactly two odd-degree vertices. This is the converse existence statement to
+`SimpleGraph.Walk.IsEulerian.card_odd_degree`. -/
+theorem exists_isEulerian_of_connected_card_oddDegree_eq_zero_or_two
+    (hconn : G.Connected)
+    (hodd : Fintype.card {v : V | Odd (G.degree v)} = 0 ∨
+      Fintype.card {v : V | Odd (G.degree v)} = 2) :
+    ∃ u v, ∃ p : G.Walk u v, p.IsEulerian := by
+  classical
+  rcases hodd with hzero | htwo
+  · obtain ⟨u₀⟩ := hconn.nonempty
+
+    have heven : ∀ v : V, Even (G.degree v) :=
+      forall_even_degree_of_card_oddDegree_eq_zero (G := G) hzero
+
+    obtain ⟨u, p, hp⟩ :=
+      exists_is_eulerian_of_connected_forall_even_degree
+        (G := G) u₀ hconn heven
+
+    exact ⟨u, u, p, hp⟩
+
+  · exact exists_isEulerian_of_connected_card_oddDegree_eq_two
+      (G := G) hconn htwo
 
 end Walk
 end SimpleGraph
