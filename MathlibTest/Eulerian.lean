@@ -12,15 +12,6 @@ variable {V : Type*} [Fintype V] [DecidableEq V]
 variable {G : SimpleGraph V} [DecidableRel G.Adj]
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
-private theorem IsTrail.cons_of_unused_edge
-    {u v w : V} {p : G.Walk v w}
-    (hp : p.IsTrail)
-    (huv : G.Adj u v)
-    (hunused : s(u, v) ∉ p.edges) :
-    (SimpleGraph.Walk.cons huv p).IsTrail := by
-  exact hp.cons huv hunused
-
-omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
 private theorem IsTrail.exists_longer_of_unused_edge_at_start
     {u v w : V} {p : G.Walk v w}
     (hp : p.IsTrail)
@@ -54,6 +45,8 @@ private theorem MaximalTrail.to_MaximalTrailFrom
   · exact hpmax.1
   · intro w q hq
     exact hpmax.2 q hq
+
+
 
 
 omit [Fintype V] [DecidableEq V] [DecidableRel G.Adj] in
@@ -634,60 +627,32 @@ private theorem MaximalTrail.is_eulerian_of_connected
   intro e he
   by_contra hnot
 
-  suffices ∃ x y : V, x ∈ p.support ∧ G.Adj x y ∧ s(x, y) ∉ p.edges by
-    rcases this with ⟨x, y, hxp, hxy, hxy_not⟩
+  obtain ⟨x, y, hxp, hxy, hxy_not⟩ :=
+    exists_unused_incident_edge_of_unused_edge
+      (G := G) (p := p) hconn he hnot
 
-    let q : G.Walk x x := p.rotate x hxp
+  let q : G.Walk x x := p.rotate x hxp
 
-    have hqTrail : q.IsTrail := by
-      dsimp [q]
-      simpa using (SimpleGraph.Walk.isTrail_rotate (c := p) hxp).mpr hpmax.1
+  have hqTrail : q.IsTrail := by
+    dsimp [q]
+    simpa using (SimpleGraph.Walk.isTrail_rotate (c := p) hxp).mpr hpmax.1
 
-    have hxy_not_q : s(x, y) ∉ q.edges := by
-      intro hmem
-      apply hxy_not
-      dsimp [q] at hmem
-      exact ((p.rotate_edges x hxp).mem_iff).mp hmem
+  have hxy_not_q : s(x, y) ∉ q.edges := by
+    intro hmem
+    apply hxy_not
+    dsimp [q] at hmem
+    exact ((p.rotate_edges x hxp).mem_iff).mp hmem
 
-    obtain ⟨r, hrTrail, hrLen⟩ :
-        ∃ r : G.Walk y x, r.IsTrail ∧ q.edges.length < r.edges.length :=
-      IsTrail.exists_longer_of_unused_edge_at_start
-        (p := q) hqTrail hxy.symm (by
-          simpa [Sym2.eq_swap] using hxy_not_q)
+  obtain ⟨r, hrTrail, hrLen⟩ :=
+    hqTrail.exists_longer_of_unused_edge_at_start hxy.symm
+      (by simpa [Sym2.eq_swap] using hxy_not_q)
 
-    have hmax := hpmax.2 r hrTrail
+  have hqLen : q.edges.length = p.edges.length := by
+    dsimp [q]
+    exact (p.rotate_edges x hxp).perm.length_eq
 
-    have hqLen : q.edges.length = p.edges.length := by
-      dsimp [q]
-      exact (p.rotate_edges x hxp).perm.length_eq
-
-    have : p.edges.length < r.edges.length := by
-      omega
-
-    exact Nat.not_lt_of_ge hmax this
-
-  induction e using Sym2.ind with
-  | h a b =>
-      have hab : G.Adj a b := (G.mem_edgeSet).mp he
-
-      by_cases ha : a ∈ p.support
-      · exact ⟨a, b, ha, hab, by simpa using hnot⟩
-
-      by_cases hb : b ∈ p.support
-      · refine ⟨b, a, hb, hab.symm, ?_⟩
-        intro hba
-        apply hnot
-        simpa [Sym2.eq_swap] using hba
-
-      have hreach : G.Reachable u a := by
-        exact hconn.1 u a
-
-      rcases hreach with ⟨w⟩
-
-      exact exists_unused_incident_edge_of_walk_to_not_support
-        (p := p) w p.start_mem_support ha
-
-
+  have : p.edges.length < r.edges.length := by omega
+  exact Nat.not_lt_of_ge (hpmax.2 r hrTrail) this
 
 -- MAIN THEOREM
 theorem exists_is_eulerian_of_connected_forall_even_degree
@@ -1270,7 +1235,7 @@ private theorem MaximalTrail.not_closed_walk_of_connected_card_odd_degree_eq_two
 
 
 
-
+  omit [DecidableEq V] in
   private theorem forall_even_degree_of_card_oddDegree_eq_zero
     (hodd : Fintype.card {v : V | Odd (G.degree v)} = 0) :
     ∀ v : V, Even (G.degree v) := by
