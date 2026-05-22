@@ -7,16 +7,16 @@ import Mathlib.Combinatorics.SimpleGraph.Trails
 import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
 
 /-!
-# Existence of Eulerian walks
+# Existence of Eulerian trails
 
-A connected finite graph has an Eulerian walk iff it has either zero or two
+A connected finite graph has an Eulerian trail iff it has either zero or two
 vertices of odd degree. This file proves the existence direction.
 
 ## Main results
 
 * `SimpleGraph.Walk.exists_isEulerian_of_connected_card_oddDegree_eq_zero_or_two`:
   in a connected finite simple graph with zero or two odd-degree vertices,
-  there exists an Eulerian walk.
+  there exists an Eulerian trail.
 
 ## Implementation notes
 
