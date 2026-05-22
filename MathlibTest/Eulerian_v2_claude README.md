@@ -277,3 +277,45 @@ typeclass machinery is introduced.
 | `p.rotate x hxp` | closed walk `p` rotated to start and end at `x` |
 | `IsMaximalTrail p` | `p` is a trail and no trail in `G` is strictly longer |
 | `IsMaximalAvoidingFrom p q` | `q` is a trail from a fixed start, avoiding `p.edges`, maximal among such |
+
+
+
+# Informal argument
+
+The main argument is the classical Euler theorem proof by maximal trail.
+
+Start with a connected finite graph where the number of odd-degree vertices is either 0 or 2. Pick a trail that is as long as possible: a walk that never repeats an edge, and among all such walks uses the maximum number of edges.
+
+Now argue that this maximal trail must actually use every edge.
+
+Case 1: no odd-degree vertices
+
+Assume every vertex has even degree.
+
+Take a longest trail p. The first key claim is that p must be closed, meaning it starts and ends at the same vertex. Informally, if it ended somewhere different, then at the endpoint the trail would have used an odd number of incident edges, forcing that vertex to have odd degree, contradiction.
+
+So p is a closed trail.
+
+Now suppose p does not use every edge. Since the graph is connected, there is some unused edge that can be reached from the vertices of p. Because p is closed, you can rotate it so it starts at the relevant vertex, then add the unused edge to make a longer trail. That contradicts maximality.
+
+Therefore the longest trail was already Eulerian.
+
+Case 2: exactly two odd-degree vertices
+
+Again take a longest trail p.
+
+A parity argument shows that its two endpoints must be exactly the two odd-degree vertices. So p is not closed: it starts at one odd vertex and ends at the other.
+
+Now suppose some edge is unused. Since the graph is connected, that unused edge is connected to the trail somehow. The proof builds a second trail q using only unused edges, starting from a vertex on p, and chosen as long as possible subject to avoiding the edges of p.
+
+The key parity step says this avoiding trail q must be closed. Intuitively: once you remove the edges already used by p, the remaining unused-edge structure has even degree at the relevant vertices, so a maximal unused trail cannot get stuck at a different endpoint.
+
+Since q is a nonempty closed detour based at a vertex of p, you can splice it into p: follow p until that vertex, go around q, return to the same vertex, then continue along p.
+
+That gives a longer trail than p, contradiction.
+
+So no edge was unused, and p was Eulerian.
+
+In one sentence
+
+Pick the longest possible trail; parity forces its endpoints to behave correctly, and connectedness plus any unused edge would let you extend or splice in a detour, contradicting maximality, so the trail must use every edge.
